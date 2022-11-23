@@ -4,32 +4,22 @@ import scipy.fftpack as fftpack # We use this one to perform Fourier transforms
 import random
 
 def f(x):
-    npx = np.sin(x)
-    for i in range(3):
-        r = random.randint(8,10)*0.1
-        # npx = npx + np.sin(r*x)
+    
+    #sygnal szerokopasmowy 6 Hz - 6000 Hz 
+    f0 = 6
+    fmax = 6e3
+    npx = np.sin(f0*x)
+    for i in range(10):
+        r = random.randint(f0,fmax)
+        npx = npx + np.sin(r*x)
     return npx
     
 if __name__ == "__main__":
-    x = np.linspace(0, 10000)
-
+    pi = np.pi
+    points = 1000
+    x = np.linspace(0, 3*pi,points)
+    plt.xlabel('time*pi')
+    plt.ylabel('amplitude')
     plt.plot(x, f(x))
     plt.show()
-    # # x axis values
-    # x = [1,2,3]
-    # # corresponding y axis values
-    # y = [2,4,1]
     
-    # # plotting the points 
-    # plt.plot(x, y)
-    
-    # # naming the x axis
-    # plt.xlabel('x - axis')
-    # # naming the y axis
-    # plt.ylabel('y - axis')
-    
-    # # giving a title to my graph
-    # plt.title('My first graph!')
-    
-    # # function to show the plot
-    # plt.show()	 
