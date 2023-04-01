@@ -1,8 +1,5 @@
 import numpy as np
-import scipy.fftpack as fftpack # We use this one to perform Fourier transforms
-from scipy.fft import fft, ifft, fftfreq, fftshift
 import random
-import math as m
 
 class BroadbandSignal:
     def __init__(self, f0, fmax, dt, duration, sampling_rate, center_frequency):

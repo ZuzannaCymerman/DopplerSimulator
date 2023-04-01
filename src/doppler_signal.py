@@ -1,10 +1,6 @@
 
 from broadband_signal import BroadbandSignal
-from scipy.fft import fft, ifft, fftfreq, fftshift
 import numpy as np
-from scipy.interpolate import interp1d
-from operator import add
-import math
 from constants import Constants as c
 
 class DopplerSignal(BroadbandSignal):
@@ -21,7 +17,7 @@ class DopplerSignal(BroadbandSignal):
     def get_doppler_signal_from_all_frequencies(self, signal, direction_o, direction_s, vo, vs, v_sound):
         y_out =[]
         for idx, unit_frequency in enumerate(signal.fourier_components):
-            doppler_shift = self.count_doppler_shift(direction_o, unit_frequency, vo, v_sound)
+            doppler_shift = self.count_doppler_shift(direction_o, unit_frequency, vo, vs, v_sound)
             shifted_frequency = unit_frequency + doppler_shift
             print(f"{idx}. Doppler shift: {doppler_shift} for frequency: {unit_frequency}")
             unit_frequency_signal_y = self.get_unit_frequency_signal_y(signal, unit_frequency)
@@ -35,7 +31,7 @@ class DopplerSignal(BroadbandSignal):
     
     def get_doppler_signal_from_center_frequency(self, signal, direction_o, direction_s, vo, vs, v_sound):
         y_out =[]
-        doppler_shift = self.count_doppler_shift(direction_o, signal.center_frequency, vo, v_sound)
+        doppler_shift = self.count_doppler_shift(direction_o, signal.center_frequency, vo,vs, v_sound)
         for idx, unit_frequency in enumerate(signal.fourier_components):
             shifted_frequency = unit_frequency + doppler_shift
             unit_frequency_signal_y = self.get_unit_frequency_signal_y(signal, unit_frequency)
@@ -50,7 +46,7 @@ class DopplerSignal(BroadbandSignal):
         noise_x = signal.X
         for component_frequency in signal.fourier_components:
                noise_x[int(component_frequency)] = 0j
-        noise_y = ifft(noise_x)
+        noise_y = np.fft.ifft(noise_x)
         return np.real(noise_y)
             
     def get_unit_frequency_signal_y(self, signal, frequency):
@@ -60,7 +56,7 @@ class DopplerSignal(BroadbandSignal):
         for component_frequency in signal.fourier_components:
             if component_frequency != frequency:
                 filtered_x[int(component_frequency)] = 0j
-        filtered_y = ifft(filtered_x)
+        filtered_y = np.fft.ifft(filtered_x)
         return np.real(filtered_y)
          
     def shift_signal(self, doppler_shift, shifted_frequency, signal, unit_frequency, unit_frequency_signal_y):
@@ -70,7 +66,6 @@ class DopplerSignal(BroadbandSignal):
             return self.broaden_signal(self)
     
     def shrink_signal(self, signal_t, signal_y, dt, duration, shifted_frequency, signal_frequency):
-        # liczymy proporcje jak skurczy sie sygnal, np dla sygnalu wezszego 2 razy bedzie ratio = 2
         ratio = float("{:.3f}".format(shifted_frequency/signal_frequency))*10
         doppler_dt = dt/10
         doppler_time_vector = np.arange(0, duration, doppler_dt)
@@ -80,13 +75,10 @@ class DopplerSignal(BroadbandSignal):
         y_doppler[0:y_cut_ratio_samples.size] = y_cut_ratio_samples
         return y_doppler
     
-    def count_doppler_shift(self, direction_o, frequency, vo, v_sound):
-        doppler_shift = direction_o*frequency*(vo/v_sound)
+    def count_doppler_shift(self, direction_o, frequency, vo, vs, v_sound):
+        doppler_shift = direction_o*frequency*(1+2*(vo+vs)/v_sound)
         #tylko dla przyblizajacergo sie? wzory dodam pozniej. 
         return doppler_shift
         
     def broaden_signal(self):
         return []
-    
-    def signal_in_db_scale(self, signal):
-        pass

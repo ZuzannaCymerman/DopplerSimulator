@@ -7,10 +7,9 @@ import sys
 import numpy as np
 from broadband_signal import BroadbandSignal
 from doppler_signal import DopplerSignal
-from scipy.interpolate import interp1d
-import math
 import pandas as pd
 from constants import Constants as c
+
 class MplCanvas(FigureCanvasQTAgg):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
@@ -32,48 +31,53 @@ class MainWindow(QMainWindow):
         self.container = QWidget()
         self.init_Qt_components()
         
-        F0 = 1*c.kHz
-        FMAX = 100*c.kHz
-        SAMPLING_RATE = 96*c.kHz
-        SIGNAL_DURATION = 0.1
-        NUMBER_OF_COMPONENTS = 5
-        OBSERVER_VELOCITY = 50
-        SOURCE_VELOCITY = 0
-        CENTER_FREQUENCY = 30*c.kHz
-        DT = 1/SAMPLING_RATE 
-        SAMPLES_NUMBER = SIGNAL_DURATION*SAMPLING_RATE
-        ANGLE_BETWEEN_V_VECTOR_AND_WAVE_VECTOR = 30
-        MODE = c.ALL_FREQUENCIES_MODE
-        # mode = c.CENTER_FREQUENCY_MODE
-        SIGNAL_SOURCE = c.SIGNAL_SOURCE_FROM_FILE
-        # signal_source = c.SIGNAL_SOURCE_GENERATED
+        params = {
+            "F0": 1*c.kHz,
+            "FMAX": 100*c.kHz,
+            "SAMPLING_RATE": 96*c.kHz,
+            "SIGNAL_DURATION": 0.1,
+            "NUMBER_OF_COMPONENTS": 5,
+            "OBSERVER_VELOCITY": 50,
+            "OBSERVER_DIRECTION": c.OBSERVER_COMMING_CLOSER,
+            "SOURCE_VELOCITY": 0,
+            "SOURCE_DIRECTION": c.SOURCE_COMMING_CLOSER,
+            "CENTER_FREQUENCY": 30*c.kHz,
+            "ANGLE_BETWEEN_V_VECTOR_AND_WAVE_VECTOR": 30,
+            "TEMPERATURE": 10,
+            "MODE": c.ALL_FREQUENCIES_MODE,
+            "SIGNAL_SOURCE": c.SIGNAL_SOURCE_FROM_FILE
+        }
+                            
+        self.simulate_doppler_effect(params)
+    
+    def simulate_doppler_effect(self, params):
+        DT = 1/params["SAMPLING_RATE"]
+        SAMPLES_NUMBER = params["SIGNAL_DURATION"]*params["SAMPLING_RATE"]
         
-        print(f"\033[94m{MODE}\033[0m")
-        print(f"\033[94m{SIGNAL_SOURCE}\033[0m")
-        
-        signal = BroadbandSignal(F0,
-                            FMAX,
+        signal = BroadbandSignal(params["F0"],
+                            params["FMAX"],
                             DT,
-                            SIGNAL_DURATION, 
-                            SAMPLING_RATE, 
-                            CENTER_FREQUENCY)
+                            params["SIGNAL_DURATION"], 
+                            params["SAMPLING_RATE"], 
+                            params["CENTER_FREQUENCY"])
         
         self.create_signal(signal,
-                           SIGNAL_SOURCE, 
-                           SAMPLES_NUMBER,F0, 
-                           FMAX, 
-                           NUMBER_OF_COMPONENTS)
+                           params["SIGNAL_SOURCE"], 
+                           SAMPLES_NUMBER,
+                           params["F0"], 
+                           params["FMAX"], 
+                           params["NUMBER_OF_COMPONENTS"])
         
         dopplerSignal = DopplerSignal(signal, 
-                                OBSERVER_VELOCITY, 
-                                SOURCE_VELOCITY, 
-                                c.TEMPERATURE, 
-                                c.OBSERVER_COMMING_CLOSER, 
-                                c.SOURCE_COMMING_CLOSER, 
-                                ANGLE_BETWEEN_V_VECTOR_AND_WAVE_VECTOR, 
-                                MODE)
+                                params["OBSERVER_VELOCITY"], 
+                                params["SOURCE_VELOCITY"], 
+                                params["TEMPERATURE"], 
+                                params["OBSERVER_DIRECTION"], 
+                                params["SOURCE_DIRECTION"], 
+                                params["ANGLE_BETWEEN_V_VECTOR_AND_WAVE_VECTOR"], 
+                                params["MODE"])
  
-        self.plot_signals(signal, dopplerSignal, F0, FMAX)
+        self.plot_signals(signal, dopplerSignal, params["F0"], params["FMAX"])
         self.set_layout()
         
     def plot_signals(self, signal, dopplerSignal, f0, fmax):
@@ -91,7 +95,6 @@ class MainWindow(QMainWindow):
             b=1
         elif signal_source == c.SIGNAL_SOURCE_GENERATED:
             signal.y = signal.generate_random_signal(signal.t,f0,fmax,number_of_components)
-        #cos tu jeszcze jest nie tak
         signal.freq, signal.X, signal.Xabs = signal.fourier(signal.y,signal.sampling_rate)
         signal.fourier_components = signal.get_fourier_components_from_fourier(signal.X, signal.fmax)
 

@@ -1,7 +1,4 @@
-
 class Constants:
-    # przeniesc zmienne gdzies indziej i zostawic ttlko stale
-    TEMPERATURE = 10
     kHz = 1e3
     SOURCE_COMMING_CLOSER = -1
     SOURCE_COMMING_FURTHER = 1
