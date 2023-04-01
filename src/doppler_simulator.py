@@ -62,23 +62,20 @@ class MainWindow(QMainWindow):
     def plot_signals(self, signal, dopplerSignal):
         self.timeChart.axes.plot(signal.t,signal.y)
         self.spectrumChart.axes.stem(signal.freq, signal.Xabs, 'b', markerfmt=" ")
-        # self.spectrumChart.axes.set_xlim(xmin=c.F0,xmax=c.FMAX)
+        self.spectrumChart.axes.set_xlim(xmin=c.F0,xmax=c.FMAX)
         self.dopplerTimeChart.axes.plot(signal.t,dopplerSignal.y)
         self.dopplerSpectrumChart.axes.stem(dopplerSignal.freq, dopplerSignal.Xabs, 'b', markerfmt=" ")
-        # self.dopplerSpectrumChart.axes.set_xlim(xmin=c.FMINMIN,xmax=c.FMAXMAX)
-        self.spectrumChart.axes.set_ylim(ymin=0,ymax=30)
+        self.dopplerSpectrumChart.axes.set_xlim(xmin=c.F0,xmax=c.FMAX)
+        # self.spectrumChart.axes.set_ylim(ymin=0,ymax=30)
 
     def create_signal(self, signal, signal_source):
-        signal_source = c.SIGNAL_SOURCE_FROM_FILE 
         if signal_source == c.SIGNAL_SOURCE_FROM_FILE:
             samples_from_file  = pd.read_csv(c.SIGNAL_FILENAME)
             signal.y =  np.array(samples_from_file.loc[1:c.SAMPLES_NUMBER,'data'])
+            b=1
         elif signal_source == c.SIGNAL_SOURCE_GENERATED:
             signal.y = signal.generate_random_signal(signal.t,c.F0,c.FMAX,c.NUMBER_OF_COMPONENTS)
-        
         #cos tu jeszcze jest nie tak
-        # signal.freq, signal.X, signal.Xabs = signal.fourier(signal.y,signal.sampling_rate)
-        # signal.y = signal.cut_noise()
         signal.freq, signal.X, signal.Xabs = signal.fourier(signal.y,signal.sampling_rate)
         signal.fourier_components = signal.get_fourier_components_from_fourier(signal.X, signal.fmax)
 

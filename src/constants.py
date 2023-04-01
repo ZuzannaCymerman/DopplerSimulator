@@ -3,16 +3,14 @@ class Constants:
     # przeniesc zmienne gdzies indziej i zostawic ttlko stale
     TEMPERATURE = 10
     kHz = 1e3
-    F0 = 1*kHz
-    FMAX = 10*kHz
-    FMINMIN = 1*kHz
-    FMAXMAX = 10*kHz
+    F0 = 1
+    FMAX = 100*kHz
     # cz. probkowania
     SAMPLING_RATE = 96*kHz
     DT = 1/SAMPLING_RATE 
     SIGNAL_DURATION = 0.1
     SAMPLES_NUMBER = SIGNAL_DURATION*SAMPLING_RATE
-    NUMBER_OF_COMPONENTS = 3
+    NUMBER_OF_COMPONENTS = 10
     OBSERVER_VELOCITY = 50
     SOURCE_VELOCITY = 0
     SOURCE_COMMING_CLOSER = -1

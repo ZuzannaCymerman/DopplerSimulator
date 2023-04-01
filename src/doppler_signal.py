@@ -23,8 +23,10 @@ class DopplerSignal(BroadbandSignal):
         for idx, unit_frequency in enumerate(signal.fourier_components):
             doppler_shift = self.count_doppler_shift(direction_o, unit_frequency, vo, v_sound)
             shifted_frequency = unit_frequency + doppler_shift
+            print(f"{idx}. Doppler shift: {doppler_shift} for frequency: {unit_frequency}")
             unit_frequency_signal_y = self.get_unit_frequency_signal_y(signal, unit_frequency)
             unit_frequency_signal_shifted_y = self.shift_signal(doppler_shift, shifted_frequency, signal, unit_frequency, unit_frequency_signal_y)
+            # unit_frequency_signal_shifted_y = self.get_unit_frequency_signal_y(signal, unit_frequency)
             if idx == 0:
                  y_out = unit_frequency_signal_shifted_y
             else:
@@ -45,11 +47,12 @@ class DopplerSignal(BroadbandSignal):
         return y_out
     
     def get_unit_frequency_signal_y(self, signal, frequency):
-        sig_fft_filtered = signal.X.copy()
-        freq = fftfreq(signal.y.size, d=signal.dt)
-        sig_fft_filtered[np.abs(freq) != frequency] = 0
-        filtered = ifft(sig_fft_filtered)
-        return np.real(filtered)
+        X = signal.X
+        filtered_x = np.zeros(X.size)
+        filtered_x = filtered_x.astype(complex)
+        filtered_x[int(frequency)] = X[int(frequency)]
+        filtered_y = ifft(filtered_x)
+        return np.real(filtered_y)
          
     def shift_signal(self, doppler_shift, shifted_frequency, signal, unit_frequency, unit_frequency_signal_y):
         if doppler_shift > 0:
@@ -70,7 +73,6 @@ class DopplerSignal(BroadbandSignal):
     
     def count_doppler_shift(self, direction_o, frequency, vo, v_sound):
         doppler_shift = direction_o*frequency*(vo/v_sound)
-        print(f"\033[93mDoppler shift: {doppler_shift}\033[0m")
         #tylko dla przyblizajacergo sie? wzory dodam pozniej. 
         return doppler_shift
         
