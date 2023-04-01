@@ -32,49 +32,65 @@ class MainWindow(QMainWindow):
         self.container = QWidget()
         self.init_Qt_components()
         
-        mode = c.ALL_FREQUENCIES_MODE
+        F0 = 1*c.kHz
+        FMAX = 100*c.kHz
+        SAMPLING_RATE = 96*c.kHz
+        SIGNAL_DURATION = 0.1
+        NUMBER_OF_COMPONENTS = 5
+        OBSERVER_VELOCITY = 50
+        SOURCE_VELOCITY = 0
+        CENTER_FREQUENCY = 30*c.kHz
+        DT = 1/SAMPLING_RATE 
+        SAMPLES_NUMBER = SIGNAL_DURATION*SAMPLING_RATE
+        ANGLE_BETWEEN_V_VECTOR_AND_WAVE_VECTOR = 30
+        MODE = c.ALL_FREQUENCIES_MODE
         # mode = c.CENTER_FREQUENCY_MODE
-        signal_source = c.SIGNAL_SOURCE_FROM_FILE
+        SIGNAL_SOURCE = c.SIGNAL_SOURCE_FROM_FILE
+        # signal_source = c.SIGNAL_SOURCE_GENERATED
         
-        print(f"\033[94m{mode}\033[0m")
-        print(f"\033[94m{signal_source}\033[0m")
+        print(f"\033[94m{MODE}\033[0m")
+        print(f"\033[94m{SIGNAL_SOURCE}\033[0m")
         
-        signal = BroadbandSignal(c.F0,
-                            c.FMAX,
-                            c.DT,
-                            c.SIGNAL_DURATION, 
-                            c.SAMPLING_RATE, 
-                            c.CENTER_FREQUENCY)
-        self.create_signal(signal, signal_source)
+        signal = BroadbandSignal(F0,
+                            FMAX,
+                            DT,
+                            SIGNAL_DURATION, 
+                            SAMPLING_RATE, 
+                            CENTER_FREQUENCY)
+        
+        self.create_signal(signal,
+                           SIGNAL_SOURCE, 
+                           SAMPLES_NUMBER,F0, 
+                           FMAX, 
+                           NUMBER_OF_COMPONENTS)
         
         dopplerSignal = DopplerSignal(signal, 
-                                c.OBSERVER_VELOCITY, 
-                                c.SOURCE_VELOCITY, 
+                                OBSERVER_VELOCITY, 
+                                SOURCE_VELOCITY, 
                                 c.TEMPERATURE, 
                                 c.OBSERVER_COMMING_CLOSER, 
                                 c.SOURCE_COMMING_CLOSER, 
-                                c.ANGLE_BETWEEN_V_VECTOR_AND_WAVE_VECTOR, 
-                                mode)
+                                ANGLE_BETWEEN_V_VECTOR_AND_WAVE_VECTOR, 
+                                MODE)
  
-        self.plot_signals(signal, dopplerSignal)
+        self.plot_signals(signal, dopplerSignal, F0, FMAX)
         self.set_layout()
         
-    def plot_signals(self, signal, dopplerSignal):
+    def plot_signals(self, signal, dopplerSignal, f0, fmax):
         self.timeChart.axes.plot(signal.t,signal.y)
         self.spectrumChart.axes.stem(signal.freq, signal.Xabs, 'b', markerfmt=" ")
-        self.spectrumChart.axes.set_xlim(xmin=c.F0,xmax=c.FMAX)
+        self.spectrumChart.axes.set_xlim(xmin=f0,xmax=fmax)
         self.dopplerTimeChart.axes.plot(signal.t,dopplerSignal.y)
         self.dopplerSpectrumChart.axes.stem(dopplerSignal.freq, dopplerSignal.Xabs, 'b', markerfmt=" ")
-        self.dopplerSpectrumChart.axes.set_xlim(xmin=c.F0,xmax=c.FMAX)
-        # self.spectrumChart.axes.set_ylim(ymin=0,ymax=30)
+        self.dopplerSpectrumChart.axes.set_xlim(xmin=f0,xmax=fmax)
 
-    def create_signal(self, signal, signal_source):
+    def create_signal(self, signal, signal_source, samples_number, f0,fmax, number_of_components):
         if signal_source == c.SIGNAL_SOURCE_FROM_FILE:
             samples_from_file  = pd.read_csv(c.SIGNAL_FILENAME)
-            signal.y =  np.array(samples_from_file.loc[1:c.SAMPLES_NUMBER,'data'])
+            signal.y =  np.array(samples_from_file.loc[1:samples_number,'data'])
             b=1
         elif signal_source == c.SIGNAL_SOURCE_GENERATED:
-            signal.y = signal.generate_random_signal(signal.t,c.F0,c.FMAX,c.NUMBER_OF_COMPONENTS)
+            signal.y = signal.generate_random_signal(signal.t,f0,fmax,number_of_components)
         #cos tu jeszcze jest nie tak
         signal.freq, signal.X, signal.Xabs = signal.fourier(signal.y,signal.sampling_rate)
         signal.fourier_components = signal.get_fourier_components_from_fourier(signal.X, signal.fmax)

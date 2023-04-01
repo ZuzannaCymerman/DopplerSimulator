@@ -31,7 +31,7 @@ class DopplerSignal(BroadbandSignal):
                  y_out = unit_frequency_signal_shifted_y
             else:
                  y_out = list( np.array(y_out) + np.array(unit_frequency_signal_shifted_y))
-        return y_out
+        return y_out+self.get_noise(signal)
     
     def get_doppler_signal_from_center_frequency(self, signal, direction_o, direction_s, vo, vs, v_sound):
         y_out =[]
@@ -44,13 +44,22 @@ class DopplerSignal(BroadbandSignal):
                  y_out = unit_frequency_signal_shifted_y
             else:
                  y_out = list( np.array(y_out) + np.array(unit_frequency_signal_shifted_y))
-        return y_out
+        return y_out+self.get_noise(signal)
     
+    def get_noise(self, signal):
+        noise_x = signal.X
+        for component_frequency in signal.fourier_components:
+               noise_x[int(component_frequency)] = 0j
+        noise_y = ifft(noise_x)
+        return np.real(noise_y)
+            
     def get_unit_frequency_signal_y(self, signal, frequency):
-        X = signal.X
-        filtered_x = np.zeros(X.size)
+        filtered_x = np.zeros(signal.X.size)
         filtered_x = filtered_x.astype(complex)
-        filtered_x[int(frequency)] = X[int(frequency)]
+        filtered_x[int(frequency)] = signal.X[int(frequency)]
+        for component_frequency in signal.fourier_components:
+            if component_frequency != frequency:
+                filtered_x[int(component_frequency)] = 0j
         filtered_y = ifft(filtered_x)
         return np.real(filtered_y)
          

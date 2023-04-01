@@ -41,17 +41,8 @@ class BroadbandSignal:
     def get_fourier_components_from_fourier(self, X, fmax):
         Xabs = np.abs(X)
         fourier_components = []
-        for frequency,amplitude in np.ndenumerate(Xabs):
-            if amplitude > 0.1 and 0 < frequency[0] <= fmax:
+        for frequency, magnitude in np.ndenumerate(Xabs):
+            if magnitude > 0.1 and 0 < frequency[0] <= fmax:
                 fourier_components.append(float(frequency[0]))
         return fourier_components
-    
-    def cut_noise(self):
-        sig_fft_filtered = self.X.copy()
-        freq = fftfreq(self.y.size, d=self.dt)
-        sig_fft_filtered[np.abs(freq) < self.f0] = 0
-        sig_fft_filtered[np.abs(freq) > self.fmax] = 0
-        filtered = ifft(sig_fft_filtered)
-        return np.real(filtered)
-        
         
