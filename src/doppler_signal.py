@@ -4,8 +4,7 @@ import numpy as np
 from constants import Constants as c
 
 class DopplerSignal(BroadbandSignal):
-    def __init__(self, signal, vo, vs, temperature, direction_o, direction_g, angle, shift_mode ):
-        v_sound = 331 + 0.6*temperature 
+    def __init__(self, signal, vo, vs, v_sound, direction_o, direction_g, angle, shift_mode ):
         if shift_mode == c.ALL_FREQUENCIES_MODE:
             self.y= self.get_doppler_signal_from_all_frequencies(signal, direction_o, direction_g, vo, vs, v_sound)
         elif shift_mode == c.CENTER_FREQUENCY_MODE:
@@ -19,7 +18,7 @@ class DopplerSignal(BroadbandSignal):
         for idx, unit_frequency in enumerate(signal.fourier_components):
             doppler_shift = self.count_doppler_shift(direction_o, unit_frequency, vo, vs, v_sound)
             shifted_frequency = unit_frequency + doppler_shift
-            print(f"{idx}. Doppler shift: {doppler_shift} for frequency: {unit_frequency}")
+            print(f"{idx}. Doppler shift: {doppler_shift} for frequency: {unit_frequency} with magnitude: {signal.Xabs[int(unit_frequency)]}")
             unit_frequency_signal_y = self.get_unit_frequency_signal_y(signal, unit_frequency)
             unit_frequency_signal_shifted_y = self.shift_signal(doppler_shift, shifted_frequency, signal, unit_frequency, unit_frequency_signal_y)
             # unit_frequency_signal_shifted_y = self.get_unit_frequency_signal_y(signal, unit_frequency)

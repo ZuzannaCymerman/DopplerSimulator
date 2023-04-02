@@ -35,8 +35,8 @@ class MainWindow(QMainWindow):
             "F0": 1*c.kHz,
             "FMAX": 100*c.kHz,
             "SAMPLING_RATE": 96*c.kHz,
-            "SIGNAL_DURATION": 0.1,
-            "NUMBER_OF_COMPONENTS": 5,
+            "SIGNAL_DURATION": 1,
+            "NUMBER_OF_COMPONENTS": 10,
             "OBSERVER_VELOCITY": 50,
             "OBSERVER_DIRECTION": c.OBSERVER_COMMING_CLOSER,
             "SOURCE_VELOCITY": 0,
@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
             "ANGLE_BETWEEN_V_VECTOR_AND_WAVE_VECTOR": 30,
             "TEMPERATURE": 10,
             "MODE": c.ALL_FREQUENCIES_MODE,
-            "SIGNAL_SOURCE": c.SIGNAL_SOURCE_FROM_FILE
+            "SIGNAL_SOURCE": c.SIGNAL_SOURCE_GENERATED
         }
                             
         self.simulate_doppler_effect(params)
@@ -53,7 +53,7 @@ class MainWindow(QMainWindow):
     def simulate_doppler_effect(self, params):
         DT = 1/params["SAMPLING_RATE"]
         SAMPLES_NUMBER = params["SIGNAL_DURATION"]*params["SAMPLING_RATE"]
-        
+        SOUND_VELOCITY = 331 + 0.6*params["TEMPERATURE"]
         signal = BroadbandSignal(params["F0"],
                             params["FMAX"],
                             DT,
@@ -71,7 +71,7 @@ class MainWindow(QMainWindow):
         dopplerSignal = DopplerSignal(signal, 
                                 params["OBSERVER_VELOCITY"], 
                                 params["SOURCE_VELOCITY"], 
-                                params["TEMPERATURE"], 
+                                SOUND_VELOCITY, 
                                 params["OBSERVER_DIRECTION"], 
                                 params["SOURCE_DIRECTION"], 
                                 params["ANGLE_BETWEEN_V_VECTOR_AND_WAVE_VECTOR"], 
@@ -92,7 +92,6 @@ class MainWindow(QMainWindow):
         if signal_source == c.SIGNAL_SOURCE_FROM_FILE:
             samples_from_file  = pd.read_csv(c.SIGNAL_FILENAME)
             signal.y =  np.array(samples_from_file.loc[1:samples_number,'data'])
-            b=1
         elif signal_source == c.SIGNAL_SOURCE_GENERATED:
             signal.y = signal.generate_random_signal(signal.t,f0,fmax,number_of_components)
         signal.freq, signal.X, signal.Xabs = signal.fourier(signal.y,signal.sampling_rate)
