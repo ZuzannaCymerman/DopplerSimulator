@@ -40,7 +40,7 @@ class BroadbandSignal:
     def get_fourier_components_from_fourier(self, Xabs, fmax):
         fourier_components = []
         for frequency, magnitude in np.ndenumerate(Xabs):
-            if magnitude > 1e-1 and 0 < frequency[0] <= fmax:
+            if magnitude > 1e-3 and 0 < frequency[0] <= fmax:
                 fourier_components.append(float(frequency[0]))
         return fourier_components
         

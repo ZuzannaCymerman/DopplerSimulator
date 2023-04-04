@@ -12,9 +12,10 @@ class DopplerSignal(BroadbandSignal):
             self.y= self.get_doppler_signal_from_center_frequency(signal, direction_o, direction_g, vo, vs, v_sound)
         filtered = list(filter(lambda y: y != 0, self.y))
         self.freq, self.X, self.Xabs = self.fourier(filtered, signal.sampling_rate) 
-        self.y = self.y
+        
 
     def get_doppler_signal_from_all_frequencies(self, signal, direction_o, direction_s, vo, vs, v_sound):
+        b=1
         y_out =[]
         for idx, unit_frequency in enumerate(signal.fourier_components):
             doppler_shift = self.count_doppler_shift(direction_o, unit_frequency, vo, vs, v_sound)

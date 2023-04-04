@@ -30,9 +30,9 @@ class MainWindow(QMainWindow):
         self.init_Qt_components()
         
         params = {
-            "F0": 10,
-            "FMAX": 50,
-            "SAMPLING_RATE": 100,
+            "F0": 1,
+            "FMAX": 100,
+            "SAMPLING_RATE": 300,
             "SIGNAL_DURATION": 1,
             "NUMBER_OF_COMPONENTS":3,
             "OBSERVER_VELOCITY": 50,
