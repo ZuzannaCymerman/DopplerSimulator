@@ -5,7 +5,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 import sys
 from doppler_simulator import DopplerSimulator
-
+import numpy as np
 from constants import Constants as c
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -30,13 +30,13 @@ class MainWindow(QMainWindow):
         self.init_Qt_components()
         
         params = {
-            "F0": 1*c.kHz,
-            "FMAX": 100*c.kHz,
-            "SAMPLING_RATE": 96*c.kHz,
+            "F0": 10,
+            "FMAX": 50,
+            "SAMPLING_RATE": 100,
             "SIGNAL_DURATION": 1,
-            "NUMBER_OF_COMPONENTS": 10,
+            "NUMBER_OF_COMPONENTS":3,
             "OBSERVER_VELOCITY": 50,
-            "OBSERVER_DIRECTION": c.OBSERVER_COMMING_CLOSER,
+            "OBSERVER_DIRECTION": c.OBSERVER_COMMING_FURTHER,
             "SOURCE_VELOCITY": 0,
             "SOURCE_DIRECTION": c.SOURCE_COMMING_CLOSER,
             "CENTER_FREQUENCY": 30*c.kHz,
@@ -57,12 +57,18 @@ class MainWindow(QMainWindow):
         print("slider moved")
     
     def plot_signals(self, signal, dopplerSignal, f0, fmax):
-        self.timeChart.axes.plot(signal.t,signal.y)
+        if dopplerSignal.t[-1] > signal.t[-1]:
+            t = np.arange(0, signal.duration*c.BROADEN_SIGNAL_PLOT_T_LENGTH, signal.dt)
+            y = [0]*t.size
+            y[0:signal.y.size] = signal.y
+            self.timeChart.axes.plot(t,y)
+        else:
+            self.timeChart.axes.plot(signal.t,signal.y)
+        self.dopplerTimeChart.axes.plot(dopplerSignal.t,dopplerSignal.y)    
         self.spectrumChart.axes.stem(signal.freq, signal.Xabs, 'b', markerfmt=" ")
-        self.spectrumChart.axes.set_xlim(xmin=f0,xmax=fmax)
-        self.dopplerTimeChart.axes.plot(signal.t,dopplerSignal.y)
+        self.spectrumChart.axes.set_xlim(xmin=0,xmax=fmax)
         self.dopplerSpectrumChart.axes.stem(dopplerSignal.freq, dopplerSignal.Xabs, 'b', markerfmt=" ")
-        self.dopplerSpectrumChart.axes.set_xlim(xmin=f0,xmax=fmax)
+        self.dopplerSpectrumChart.axes.set_xlim(xmin=0,xmax=fmax)
     
     def set_layout(self):
         self.layout.addWidget(self.timeLabel, 0,1)        
@@ -85,7 +91,6 @@ class MainWindow(QMainWindow):
         self.spectrumChart.axes.grid(color='black', linestyle='-', linewidth=0.3)
         self.dopplerSpectrumChart.axes.grid(color='black', linestyle='-', linewidth=0.3)
 
-        
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()

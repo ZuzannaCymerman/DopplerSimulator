@@ -23,7 +23,7 @@ class DopplerSimulator:
                            params["F0"], 
                            params["FMAX"], 
                            params["NUMBER_OF_COMPONENTS"])
-        
+
         self.dopplerSignal = DopplerSignal(self.signal, 
                                 params["OBSERVER_VELOCITY"], 
                                 params["SOURCE_VELOCITY"], 
@@ -39,8 +39,5 @@ class DopplerSimulator:
             signal.y =  np.array(samples_from_file.loc[1:samples_number,'data'])
         elif signal_source == c.SIGNAL_SOURCE_GENERATED:
             signal.y = signal.generate_random_signal(signal.t,f0,fmax,number_of_components)
-        signal.freq, signal.X, signal.Xabs = signal.fourier(signal.y,signal.sampling_rate)
-        signal.fourier_components = signal.get_fourier_components_from_fourier(signal.X, signal.fmax)
-
-
-        
+        signal.freq, signal.X, signal.Xabs = signal.fourier(signal.y, signal.sampling_rate)
+        signal.fourier_components = signal.get_fourier_components_from_fourier(signal.Xabs, signal.fmax)

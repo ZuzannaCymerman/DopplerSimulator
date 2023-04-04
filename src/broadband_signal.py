@@ -1,5 +1,6 @@
 import numpy as np
 import random
+from constants import Constants as c
 
 class BroadbandSignal:
     def __init__(self, f0, fmax, dt, duration, sampling_rate, center_frequency):
@@ -25,21 +26,21 @@ class BroadbandSignal:
             print(r)
         return y
     
-    def fourier(self,y,sampling_rate):
+    def fourier(self,y, sr):
         X = np.fft.fft(y)
-        N = len(X)
-        n = np.arange(N)
-        T = N/sampling_rate
-        freq = n/T 
-        Xabs = np.abs(X)
-        print(f"\033[92mSignal length: {len(y)}\033[0m")
+        fs = len(X)
+        if fs > sr:
+            T = fs/sr/c.INTERP_SAMPLE_NUMBER_INCREASE
+        else:
+            T = fs/sr
+        freq = np.fft.fftfreq(fs, 1/fs) /T
+        Xabs = np.abs(np.fft.fft(y)) /(fs/2)
         return freq, X, Xabs
     
-    def get_fourier_components_from_fourier(self, X, fmax):
-        Xabs = np.abs(X)
+    def get_fourier_components_from_fourier(self, Xabs, fmax):
         fourier_components = []
         for frequency, magnitude in np.ndenumerate(Xabs):
-            if magnitude > 0.1 and 0 < frequency[0] <= fmax:
+            if magnitude > 1e-1 and 0 < frequency[0] <= fmax:
                 fourier_components.append(float(frequency[0]))
         return fourier_components
         
