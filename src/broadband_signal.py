@@ -3,7 +3,7 @@ import random
 from constants import Constants as c
 
 class BroadbandSignal:
-    def __init__(self, f0, fmax, dt, duration, sampling_rate, center_frequency):
+    def __init__(self, f0, fmax, dt, duration, sampling_rate, center_frequency, samples_number):
         self.dt = dt
         self.duration = duration
         self.f0 = f0
@@ -16,6 +16,7 @@ class BroadbandSignal:
         self.sampling_rate = sampling_rate
         self.fourier_components = []
         self.center_frequency = center_frequency
+        self.samples_number = samples_number
 
     def generate_random_signal(self, t, f0, fmax, numOfComponents):
         y = np.sin(2*np.pi*f0*t)
@@ -27,20 +28,44 @@ class BroadbandSignal:
         return y
     
     def fourier(self,y, sr):
-        X = np.fft.fft(y)
-        fs = len(X)
-        if fs > sr:
-            T = fs/sr/c.INTERP_SAMPLE_NUMBER_INCREASE
+        N = len(y)
+        Xabs = np.abs(np.fft.rfft(y * np.hamming(N))) / (N/2)
+        # X = np.fft.fft(y)
+        X= np.fft.fft(y * np.hamming(N))
+        Xabs = np.abs(np.fft.rfft(y)) / (N/2)
+        # N = len(X)
+        if N > sr:
+            T = N/sr/c.INTERP_SAMPLE_NUMBER_INCREASE
         else:
-            T = fs/sr
-        freq = np.fft.fftfreq(fs, 1/fs) /T
-        Xabs = np.abs(np.fft.fft(y)) /(fs/2)
+            T = N/sr
+        freq = np.fft.rfftfreq(N, 1/N) /T
+        # Xabs = np.abs(np.fft.fft(y)) /(N/2)
         return freq, X, Xabs
     
-    def get_fourier_components_from_fourier(self, Xabs, fmax):
+    # def fourier_windowed(self,y, sr):
+    #     X = np.fft.fft(y)
+    #     N = len(X)
+    #     if N > sr:
+    #         T = N/sr/c.INTERP_SAMPLE_NUMBER_INCREASE
+    #     else:
+    #         T = N/sr
+    #     freq = np.fft.fftfreq(N, 1/N) /T
+    #     windowed_y = np.hamming(N) * y
+    #     # windowed_y = y
+    #     Xabs = np.abs(np.fft.fft(windowed_y)) /(N/2)
+    #     return freq, X, Xabs
+    
+    def get_fourier_components_from_fourier(self, signal):
+        fs = signal.sampling_rate
+        Xabs_dB = 20 * np.log10(signal.Xabs)
+        treshhold = -45
+        ponad = (Xabs_dB >= treshhold).astype(np.int)
+        diff = np.diff(ponad)
+        starts = np.where(diff == 1)[0] + 1
+        ends = np.where(diff == -1)[0] + 1
         fourier_components = []
-        for frequency, magnitude in np.ndenumerate(Xabs):
-            if magnitude > 1e-3 and 0 < frequency[0] <= fmax:
-                fourier_components.append(float(frequency[0]))
+        for start, end in zip(starts, ends):
+            p = np.argmax(Xabs_dB[start:end]) + start
+            fourier_components.append(p * fs / signal.samples_number)
         return fourier_components
         

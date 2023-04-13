@@ -30,13 +30,13 @@ class MainWindow(QMainWindow):
         self.init_Qt_components()
         
         params = {
-            "F0": 1,
-            "FMAX": 100,
-            "SAMPLING_RATE": 300,
+            "F0": 10,
+            "FMAX":100 ,
+            "SAMPLING_RATE": 400,
             "SIGNAL_DURATION": 1,
-            "NUMBER_OF_COMPONENTS":3,
+            "NUMBER_OF_COMPONENTS": 3,
             "OBSERVER_VELOCITY": 50,
-            "OBSERVER_DIRECTION": c.OBSERVER_COMMING_FURTHER,
+            "OBSERVER_DIRECTION": c.OBSERVER_COMMING_CLOSER,
             "SOURCE_VELOCITY": 0,
             "SOURCE_DIRECTION": c.SOURCE_COMMING_CLOSER,
             "CENTER_FREQUENCY": 30*c.kHz,
@@ -66,9 +66,12 @@ class MainWindow(QMainWindow):
             self.timeChart.axes.plot(signal.t,signal.y)
         self.dopplerTimeChart.axes.plot(dopplerSignal.t,dopplerSignal.y)    
         self.spectrumChart.axes.stem(signal.freq, signal.Xabs, 'b', markerfmt=" ")
+        # self.spectrumChart.axes.plot(signal.freq, signal.Xabs)
         self.spectrumChart.axes.set_xlim(xmin=0,xmax=fmax)
+        # self.dopplerSpectrumChart.axes.plot(dopplerSignal.freq, dopplerSignal.Xabs)
         self.dopplerSpectrumChart.axes.stem(dopplerSignal.freq, dopplerSignal.Xabs, 'b', markerfmt=" ")
-        self.dopplerSpectrumChart.axes.set_xlim(xmin=0,xmax=fmax)
+        self.spectrumChart.axes.set_xlim(xmin=0,xmax=fmax*1.2)
+        self.dopplerSpectrumChart.axes.set_xlim(xmin=0,xmax=fmax*1.2)
     
     def set_layout(self):
         self.layout.addWidget(self.timeLabel, 0,1)        

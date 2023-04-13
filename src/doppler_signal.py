@@ -15,16 +15,13 @@ class DopplerSignal(BroadbandSignal):
         
 
     def get_doppler_signal_from_all_frequencies(self, signal, direction_o, direction_s, vo, vs, v_sound):
-        b=1
         y_out =[]
         for idx, unit_frequency in enumerate(signal.fourier_components):
             doppler_shift = self.count_doppler_shift(direction_o, unit_frequency, vo, vs, v_sound)
             shifted_frequency = unit_frequency + doppler_shift
-            # self.doppler_shifts.append(doppler_shift)
-            print(f"\033[92m{idx}. ds: {doppler_shift},f: {unit_frequency},m: {signal.Xabs[int(unit_frequency)]},fout: {unit_frequency+doppler_shift}\033[0m")
+            print(f"\033[92m{idx}. f0: {unit_frequency}, fout: {unit_frequency+doppler_shift}, ds: {doppler_shift}, m: {signal.Xabs[int(unit_frequency)]}\033[0m")
             unit_frequency_signal_y = self.get_unit_frequency_signal_y(signal, unit_frequency)
             unit_frequency_signal_shifted_y, doppler_t = self.shift_signal(doppler_shift, shifted_frequency, signal, unit_frequency, unit_frequency_signal_y)
-            # unit_frequency_signal_shifted_y = self.get_unit_frequency_signal_y(signal, unit_frequency)
             if idx == 0:
                  y_out = unit_frequency_signal_shifted_y
             else:
@@ -52,6 +49,7 @@ class DopplerSignal(BroadbandSignal):
         return np.real(noise_y)
             
     def get_unit_frequency_signal_y(self, signal, frequency):
+        # filtered_x = signal.X
         filtered_x = np.zeros(signal.X.size)
         filtered_x = filtered_x.astype(complex)
         filtered_x[int(frequency)] = signal.X[int(frequency)]
@@ -62,7 +60,7 @@ class DopplerSignal(BroadbandSignal):
         return np.real(filtered_y)
          
     def shift_signal(self, doppler_shift, shifted_frequency, signal, unit_frequency, unit_frequency_signal_y):
-        if doppler_shift > 0:
+        if doppler_shift >= 0:
             y, t = self.shrink_signal(signal.t, unit_frequency_signal_y, signal.dt,signal.duration, shifted_frequency, unit_frequency)
         elif doppler_shift < 0:
             y, t = self.broaden_signal(signal.t, unit_frequency_signal_y, signal.dt,signal.duration, shifted_frequency, unit_frequency)

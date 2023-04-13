@@ -15,7 +15,8 @@ class DopplerSimulator:
                             DT,
                             params["SIGNAL_DURATION"], 
                             params["SAMPLING_RATE"], 
-                            params["CENTER_FREQUENCY"])
+                            params["CENTER_FREQUENCY"],
+                            SAMPLES_NUMBER)
         
         self.create_signal(self.signal,
                            params["SIGNAL_SOURCE"], 
@@ -36,8 +37,8 @@ class DopplerSimulator:
     def create_signal(self, signal, signal_source, samples_number, f0,fmax, number_of_components):
         if signal_source == c.SIGNAL_SOURCE_FROM_FILE:
             samples_from_file  = pd.read_csv(c.SIGNAL_FILENAME)
-            signal.y =  np.array(samples_from_file.loc[1:samples_number,'data'])
+            signal.y =  np.array(samples_from_file.loc[0:samples_number,'data'])
         elif signal_source == c.SIGNAL_SOURCE_GENERATED:
             signal.y = signal.generate_random_signal(signal.t,f0,fmax,number_of_components)
         signal.freq, signal.X, signal.Xabs = signal.fourier(signal.y, signal.sampling_rate)
-        signal.fourier_components = signal.get_fourier_components_from_fourier(signal.Xabs, signal.fmax)
+        signal.fourier_components = signal.get_fourier_components_from_fourier(signal)
