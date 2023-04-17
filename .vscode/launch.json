@@ -8,7 +8,7 @@
             "name": "Python: bieżący plik",
             "type": "python",
             "request": "launch",
-            "program": "/Users/zuzannacymerman/Dokumenty_lokalnie/studia/studia_mgr/mgr/symulator/src/doppler_simulator.py",
+            "program": "/Users/zuzannacymerman/Dokumenty_lokalnie/studia/studia_mgr/mgr/symulator/src/main.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "/Users/zuzannacymerman/Dokumenty_lokalnie/studia/studia_mgr/mgr/symulator/src/"
