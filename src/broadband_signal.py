@@ -30,33 +30,21 @@ class BroadbandSignal:
             print(r)
         return y
 
-    def fourier(self, y, sr):
+    def fourier(self, y, sr, hamming=True):
         N = len(y)
-        Xabs = np.abs(np.fft.rfft(y * np.hamming(N))) / (N / 2)
-        # X = np.fft.fft(y)
-        X = np.fft.rfft(y * np.hamming(N))
-        # Xabs = np.abs(np.fft.rfft(y)) / (N / 2)
-        # N = len(X)
+        if hamming:
+            Xabs = np.abs(np.fft.rfft(y * np.hamming(N))) / (N / 2)
+            X = np.fft.rfft(y * np.hamming(N))
+        else:
+            X = np.fft.rfft(y)
+            Xabs = np.abs(np.fft.rfft(y)) / (N / 2)
         if N > sr:
             T = N / sr / c.INTERP_SAMPLE_NUMBER_INCREASE
         else:
             T = N / sr
         freq = np.fft.rfftfreq(N, 1 / N) / T
-        # Xabs = np.abs(np.fft.fft(y)) /(N/2)
-        return freq, X, Xabs
 
-    # def fourier_windowed(self,y, sr):
-    #     X = np.fft.fft(y)
-    #     N = len(X)
-    #     if N > sr:
-    #         T = N/sr/c.INTERP_SAMPLE_NUMBER_INCREASE
-    #     else:
-    #         T = N/sr
-    #     freq = np.fft.fftfreq(N, 1/N) /T
-    #     windowed_y = np.hamming(N) * y
-    #     # windowed_y = y
-    #     Xabs = np.abs(np.fft.fft(windowed_y)) /(N/2)
-    #     return freq, X, Xabs
+        return freq, X, Xabs
 
     def get_fourier_components_from_fourier(self, signal):
         fs = signal.sampling_rate
@@ -66,9 +54,11 @@ class BroadbandSignal:
         diff = np.diff(ponad)
         starts = np.where(diff == 1)[0] + 1
         ends = np.where(diff == -1)[0] + 1
-        fourier_components = dict({"freq": [], "arg": []})
+        fourier_components = dict({"freq": [], "arg": [], "start": [], "end": []})
         for start, end in zip(starts, ends):
             p = np.argmax(Xabs_dB[start:end]) + start
             fourier_components["freq"].append(p * fs / signal.samples_number)
+            fourier_components["start"].append(start)
+            fourier_components["end"].append(end)
             fourier_components["arg"].append(p)
         return fourier_components

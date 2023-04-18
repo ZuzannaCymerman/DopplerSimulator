@@ -32,20 +32,20 @@ class MainWindow(QMainWindow):
         self.init_Qt_components()
 
         params = {
-            "F0": 10 * c.kHz,
-            "FMAX": 100 * c.kHz,
-            "SAMPLING_RATE": 96 * c.kHz,
-            "SIGNAL_DURATION": 0.1,
+            "F0": 10,
+            "FMAX": 100,
+            "SAMPLING_RATE": 250,
+            "SIGNAL_DURATION": 1,
             "NUMBER_OF_COMPONENTS": 3,
             "OBSERVER_VELOCITY": 50,
             "OBSERVER_DIRECTION": c.OBSERVER_COMMING_CLOSER,
             "SOURCE_VELOCITY": 0,
             "SOURCE_DIRECTION": c.SOURCE_COMMING_CLOSER,
-            "CENTER_FREQUENCY": 30 * c.kHz,
+            "CENTER_FREQUENCY": 30,
             "ANGLE_BETWEEN_V_VECTOR_AND_WAVE_VECTOR": 30,
-            "TEMPERATURE": 10,
+            "TEMPERATURE": 20,
             "MODE": c.ALL_FREQUENCIES_MODE,
-            "SIGNAL_SOURCE": c.SIGNAL_SOURCE_FROM_FILE,
+            "SIGNAL_SOURCE": c.SIGNAL_SOURCE_GENERATED,
         }
 
         doppler_simulator = DopplerSimulator(params)

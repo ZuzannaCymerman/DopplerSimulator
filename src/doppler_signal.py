@@ -13,10 +13,9 @@ class DopplerSignal(BroadbandSignal):
                 signal, direction_o, direction_g, vo, vs, v_sound
             )
         elif shift_mode == c.CENTER_FREQUENCY_MODE:
-            self.y = self.get_doppler_signal_from_center_frequency(
+            self.y, self.t = self.get_doppler_signal_from_center_frequency(
                 signal, direction_o, direction_g, vo, vs, v_sound
             )
-        self.y = self.y
         filtered = list(filter(lambda y: y != 0, self.y))
         self.freq, self.X, self.Xabs = self.fourier(filtered, signal.sampling_rate)
 
@@ -57,25 +56,18 @@ class DopplerSignal(BroadbandSignal):
         doppler_shift = self.count_doppler_shift(
             direction_o, signal.center_frequency, vo, vs, v_sound
         )
-        for idx, unit_frequency in enumerate(signal.fourier_components):
-            shifted_frequency = unit_frequency + doppler_shift
-            unit_frequency_signal_y = self.get_unit_frequency_signal_y(
-                signal, unit_frequency
-            )
-            unit_frequency_signal_shifted_y = self.shift_signal(
-                doppler_shift,
-                shifted_frequency,
-                signal,
-                unit_frequency,
-                unit_frequency_signal_y,
-            )
-            if idx == 0:
-                y_out = unit_frequency_signal_shifted_y
-            else:
-                y_out = list(
-                    np.array(y_out) + np.array(unit_frequency_signal_shifted_y)
-                )
-        return y_out + self.get_noise(signal)
+        shifted_frequency = signal.center_frequency + doppler_shift
+        print(
+            f"\033[92m f0: {signal.center_frequency}, fout: {signal.center_frequency+doppler_shift}, ds: {doppler_shift}\033[0m"
+        )
+        y_out, doppler_t = self.shift_signal(
+            doppler_shift,
+            shifted_frequency,
+            signal,
+            signal.center_frequency,
+            signal.y,
+        )
+        return y_out, doppler_t
 
     def get_noise(self, signal):
         noise_x = signal.X
@@ -91,16 +83,16 @@ class DopplerSignal(BroadbandSignal):
 
         fourier_components_freqs = signal.fourier_components["freq"]
         fourier_components_args = signal.fourier_components["arg"]
+        fourier_components_starts = signal.fourier_components["start"]
+        fourier_components_ends = signal.fourier_components["end"]
 
-        frequency_x_arg = fourier_components_args[
-            fourier_components_freqs.index(frequency)
-        ]
+        freq_index = fourier_components_freqs.index(frequency)
+        frequency_x_arg = fourier_components_args[freq_index]
+        frequency_start = fourier_components_starts[freq_index]
+        frequency_end = fourier_components_ends[freq_index]
 
-        filtered_x[frequency_x_arg] = signal.X[frequency_x_arg]
-
-        # for idx, component_frequency in enumerate(fourier_components_freqs):
-        #     if component_frequency != frequency:
-        #         filtered_x[int(fourier_components_args[idx])] = 0j
+        for i in range(frequency_start, frequency_end):
+            filtered_x[i] = signal.X[i]
         filtered_y = np.fft.irfft(filtered_x)
         return filtered_y
 
