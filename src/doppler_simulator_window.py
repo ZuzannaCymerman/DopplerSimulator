@@ -61,6 +61,8 @@ class DopplerSimulatorWindow(QMainWindow):
         self.ratioLabel = QLabel("Ratio: 0")
         self.modeLabel = QLabel("Mode")
         self.modeCombobox = QComboBox()
+        self.centerFrequencyLabel = QLabel("Center frequency")
+        self.centerFrequencyInput = QLineEdit()
 
     def set_layout(self):
         self.layout.addWidget(self.label, 0, 0)
@@ -85,6 +87,8 @@ class DopplerSimulatorWindow(QMainWindow):
         self.control_layout.addWidget(self.number_of_components_input, 8, 1)
         self.control_layout.addWidget(self.modeLabel, 9, 0)
         self.control_layout.addWidget(self.modeCombobox, 9, 1)
+        self.control_layout.addWidget(self.centerFrequencyLabel, 10, 0)
+        self.control_layout.addWidget(self.centerFrequencyInput, 10, 1)
 
         self.chart_layout.addWidget(self.timeChart, 1, 0)
         self.chart_layout2.addWidget(self.spectrumChart, 1, 0)
@@ -123,6 +127,7 @@ class DopplerSimulatorWindow(QMainWindow):
         self.ratioLabel.setAlignment(Qt.AlignCenter)
         self.modeCombobox.addItems(["From all frequencies", "From center frequency"])
         self.modeLabel.setAlignment(Qt.AlignRight)
+        self.centerFrequencyLabel.setAlignment(Qt.AlignRight)
 
     def clearAxes(self):
         self.timeChart.axes.clear()
@@ -155,6 +160,7 @@ class DopplerSimulatorWindow(QMainWindow):
             self.observer_direction_combobox.setCurrentText("Observer comming further")
         self.signal_source_combobox.setCurrentText(f"{params['SIGNAL_SOURCE']}")
         self.modeCombobox.setCurrentText(f"{params['MODE']}")
+        self.centerFrequencyInput.setText(f"{params['CENTER_FREQUENCY']}")
 
     def setAxesXlim(self, fmax):
         self.spectrumChart.axes.set_xlim(xmin=0, xmax=fmax * 1.5)

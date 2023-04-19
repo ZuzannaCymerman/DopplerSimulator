@@ -89,6 +89,9 @@ class MainWindow(DopplerSimulatorWindow):
         self.params["OBSERVER_VELOCITY"] = int(self.slider.value())
         self.params["SIGNAL_SOURCE"] = self.signal_source_combobox.currentText()
         self.params["MODE"] = self.modeCombobox.currentText()
+        if self.params["SIGNAL_SOURCE"] == c.SIGNAL_SOURCE_GENERATED:
+            self.params["SAMPLING_RATE"] = self.params["SAMPLING_RATE"] * 10
+        self.params["CENTER_FREQUENCY"] == int(self.centerFrequencyInput.text())
 
 
 if __name__ == "__main__":

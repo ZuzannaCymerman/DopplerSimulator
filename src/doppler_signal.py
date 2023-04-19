@@ -150,7 +150,6 @@ class DopplerSignal(BroadbandSignal):
         ratio = float("{:.3f}".format(signal_frequency / shifted_frequency))
         interp_ratio = ratio * c.INTERP_SAMPLE_NUMBER_INCREASE
         self.ratio = int(interp_ratio) / c.INTERP_SAMPLE_NUMBER_INCREASE
-
         doppler_dt = dt / c.INTERP_SAMPLE_NUMBER_INCREASE
         t_out = np.arange(0, duration * c.BROADEN_SIGNAL_PLOT_T_LENGTH, doppler_dt)
         doppler_time_vector = np.arange(0, duration, dt / int(interp_ratio))
