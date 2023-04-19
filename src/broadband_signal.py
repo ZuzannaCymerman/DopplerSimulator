@@ -30,7 +30,7 @@ class BroadbandSignal:
             print(r)
         return y
 
-    def fourier(self, y, sr, hamming=True):
+    def fourier(self, y, sr, hamming=False):
         N = len(y)
         if hamming:
             Xabs = np.abs(np.fft.rfft(y * np.hamming(N))) / (N / 2)

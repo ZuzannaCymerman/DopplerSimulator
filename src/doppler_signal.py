@@ -4,28 +4,29 @@ from constants import Constants as c
 
 
 class DopplerSignal(BroadbandSignal):
-    def __init__(
-        self, signal, vo, vs, v_sound, direction_o, direction_g, angle, shift_mode
-    ):
+    def __init__(self, signal, vo, v_sound, direction_o, angle, shift_mode):
         self.doppler_shifts = []
+        self.sampling_rate = signal.sampling_rate
+        self.samples_number = signal.samples_number
+        self.ratio = 1
         if shift_mode == c.ALL_FREQUENCIES_MODE:
             self.y, self.t = self.get_doppler_signal_from_all_frequencies(
-                signal, direction_o, direction_g, vo, vs, v_sound
+                signal, direction_o, vo, v_sound
             )
         elif shift_mode == c.CENTER_FREQUENCY_MODE:
             self.y, self.t = self.get_doppler_signal_from_center_frequency(
-                signal, direction_o, direction_g, vo, vs, v_sound
+                signal, direction_o, vo, v_sound
             )
-        filtered = list(filter(lambda y: y != 0, self.y))
-        self.freq, self.X, self.Xabs = self.fourier(filtered, signal.sampling_rate)
+        filtered = self.y[0 : self.samples_number]
+        self.freq, self.X, self.Xabs = self.fourier(
+            filtered, self.sampling_rate, hamming=True
+        )
 
-    def get_doppler_signal_from_all_frequencies(
-        self, signal, direction_o, direction_s, vo, vs, v_sound
-    ):
+    def get_doppler_signal_from_all_frequencies(self, signal, direction_o, vo, v_sound):
         y_out = []
         for idx, unit_frequency in enumerate(signal.fourier_components["freq"]):
             doppler_shift = self.count_doppler_shift(
-                direction_o, unit_frequency, vo, vs, v_sound
+                direction_o, unit_frequency, vo, v_sound
             )
             shifted_frequency = unit_frequency + doppler_shift
             print(
@@ -50,16 +51,13 @@ class DopplerSignal(BroadbandSignal):
         return y_out, doppler_t
 
     def get_doppler_signal_from_center_frequency(
-        self, signal, direction_o, direction_s, vo, vs, v_sound
+        self, signal, direction_o, vo, v_sound
     ):
         y_out = []
         doppler_shift = self.count_doppler_shift(
-            direction_o, signal.center_frequency, vo, vs, v_sound
+            direction_o, signal.center_frequency, vo, v_sound
         )
         shifted_frequency = signal.center_frequency + doppler_shift
-        print(
-            f"\033[92m f0: {signal.center_frequency}, fout: {signal.center_frequency+doppler_shift}, ds: {doppler_shift}\033[0m"
-        )
         y_out, doppler_t = self.shift_signal(
             doppler_shift,
             shifted_frequency,
@@ -77,7 +75,6 @@ class DopplerSignal(BroadbandSignal):
         return np.real(noise_y)
 
     def get_unit_frequency_signal_y(self, signal, frequency):
-        # filtered_x = signal.X
         filtered_x = np.zeros(signal.X.size)
         filtered_x = filtered_x.astype(complex)
 
@@ -127,33 +124,40 @@ class DopplerSignal(BroadbandSignal):
     def shrink_signal(
         self, signal_t, signal_y, dt, duration, shifted_frequency, signal_frequency
     ):
-        ratio = (
-            float("{:.3f}".format(shifted_frequency / signal_frequency))
-            * c.INTERP_SAMPLE_NUMBER_INCREASE
-        )
+        ratio = float("{:.3f}".format(shifted_frequency / signal_frequency))
+        interp_ratio = ratio * c.INTERP_SAMPLE_NUMBER_INCREASE
+        self.ratio = int(interp_ratio) / c.INTERP_SAMPLE_NUMBER_INCREASE
+
         doppler_dt = dt / c.INTERP_SAMPLE_NUMBER_INCREASE
         doppler_time_vector = np.arange(0, duration, doppler_dt)
         y_doppler = [0] * signal_t.size
         interpolated_y = np.interp(doppler_time_vector, signal_t, signal_y)
-        y_cut_ratio_samples = interpolated_y[:: int(ratio)]
+        y_cut_ratio_samples = interpolated_y[:: int(interp_ratio)]
         y_doppler[0 : y_cut_ratio_samples.size] = y_cut_ratio_samples
+        # self.sampling_rate = int(
+        #     self.sampling_rate * interp_ratio / c.INTERP_SAMPLE_NUMBER_INCREASE
+        # )
+        self.samples_number = y_cut_ratio_samples.size
         return y_doppler, signal_t
 
-    def count_doppler_shift(self, direction_o, frequency, vo, vs, v_sound):
+    def count_doppler_shift(self, direction_o, frequency, vo, v_sound):
         doppler_shift = direction_o * frequency * (vo / v_sound)
         return doppler_shift
 
     def broaden_signal(
         self, signal_t, signal_y, dt, duration, shifted_frequency, signal_frequency
     ):
-        ratio = (
-            float("{:.3f}".format(signal_frequency / shifted_frequency))
-            * c.INTERP_SAMPLE_NUMBER_INCREASE
-        )
+        ratio = float("{:.3f}".format(signal_frequency / shifted_frequency))
+        interp_ratio = ratio * c.INTERP_SAMPLE_NUMBER_INCREASE
+        self.ratio = int(interp_ratio) / c.INTERP_SAMPLE_NUMBER_INCREASE
+
         doppler_dt = dt / c.INTERP_SAMPLE_NUMBER_INCREASE
         t_out = np.arange(0, duration * c.BROADEN_SIGNAL_PLOT_T_LENGTH, doppler_dt)
-        doppler_time_vector = np.arange(0, duration, dt / int(ratio))
+        doppler_time_vector = np.arange(0, duration, dt / int(interp_ratio))
         interpolated_y = np.interp(doppler_time_vector, signal_t, signal_y)
         y_out = [0] * t_out.size
         y_out[0 : doppler_time_vector.size] = interpolated_y
+        # find how many samples are in 1s
+        # self.sampling_rate = np.where(t_out == min(t_out, key=lambda x: abs(x - 1)))[0]
+        self.samples_number = doppler_time_vector.size
         return y_out, t_out

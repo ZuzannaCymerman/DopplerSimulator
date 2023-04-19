@@ -33,10 +33,8 @@ class DopplerSimulator:
         self.dopplerSignal = DopplerSignal(
             self.signal,
             params["OBSERVER_VELOCITY"],
-            params["SOURCE_VELOCITY"],
             SOUND_VELOCITY,
             params["OBSERVER_DIRECTION"],
-            params["SOURCE_DIRECTION"],
             params["ANGLE_BETWEEN_V_VECTOR_AND_WAVE_VECTOR"],
             params["MODE"],
         )
@@ -52,6 +50,6 @@ class DopplerSimulator:
                 signal.t, f0, fmax, number_of_components
             )
         signal.freq, signal.X, signal.Xabs = signal.fourier(
-            signal.y, signal.sampling_rate
+            signal.y, signal.sampling_rate, hamming=True
         )
         signal.fourier_components = signal.get_fourier_components_from_fourier(signal)
