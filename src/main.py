@@ -20,7 +20,7 @@ class MainWindow(DopplerSimulatorWindow):
             "SIGNAL_DURATION": 1,
             "NUMBER_OF_COMPONENTS": 1,
             "OBSERVER_VELOCITY": 50,
-            "OBSERVER_DIRECTION": c.OBSERVER_COMMING_FURTHER,
+            "OBSERVER_DIRECTION": c.OBSERVER_COMMING_CLOSER,
             "CENTER_FREQUENCY": 50,
             "ANGLE_BETWEEN_V_VECTOR_AND_WAVE_VECTOR": 30,
             "TEMPERATURE": 20,
