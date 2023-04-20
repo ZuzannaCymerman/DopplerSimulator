@@ -163,5 +163,6 @@ class DopplerSimulatorWindow(QMainWindow):
         self.centerFrequencyInput.setText(f"{params['CENTER_FREQUENCY']}")
 
     def setAxesXlim(self, fmax):
-        self.spectrumChart.axes.set_xlim(xmin=0, xmax=fmax * 1.5)
-        self.dopplerSpectrumChart.axes.set_xlim(xmin=0, xmax=fmax * 1.5)
+        # self.spectrumChart.axes.set_xlim(xmin=0, xmax=fmax * 1.5)
+        # self.dopplerSpectrumChart.axes.set_xlim(xmin=0, xmax=fmax * 1.5)
+        pass

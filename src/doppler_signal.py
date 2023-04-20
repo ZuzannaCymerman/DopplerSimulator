@@ -91,6 +91,7 @@ class DopplerSignal(BroadbandSignal):
         for i in range(frequency_start, frequency_end):
             filtered_x[i] = signal.X[i]
         filtered_y = np.fft.irfft(filtered_x)
+        filtered_y = filtered_y / np.hamming(filtered_y.size)
         return filtered_y
 
     def shift_signal(
