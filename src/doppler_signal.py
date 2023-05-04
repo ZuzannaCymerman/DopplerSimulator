@@ -17,38 +17,29 @@ class DopplerSignal(BroadbandSignal):
             self.y, self.t = self.get_doppler_signal_from_center_frequency(
                 signal, direction_o, vo, v_sound
             )
-        filtered = self.y[0 : self.samples_number]
+        filtered = self.y[0 : int(self.samples_number)]
         self.freq, self.X, self.Xabs = self.fourier(
             filtered, self.sampling_rate, hamming=True
         )
 
     def get_doppler_signal_from_all_frequencies(self, signal, direction_o, vo, v_sound):
-        y_out = []
         for idx, unit_frequency in enumerate(signal.fourier_components["freq"]):
             doppler_shift = self.count_doppler_shift(
                 direction_o, unit_frequency, vo, v_sound
             )
-            shifted_frequency = unit_frequency + doppler_shift
             print(
                 f"\033[92m{idx}. f0: {unit_frequency}, fout: {unit_frequency+doppler_shift}, ds: {doppler_shift}\033[0m"
             )
-            unit_frequency_signal_y = self.get_unit_frequency_signal_y(
-                signal, unit_frequency
-            )
-            unit_frequency_signal_shifted_y, doppler_t = self.shift_signal(
-                doppler_shift,
-                shifted_frequency,
-                signal,
-                unit_frequency,
-                unit_frequency_signal_y,
+            shifted_unit_spectrum = self.shift_spectrum_unit(
+                signal, unit_frequency, doppler_shift
             )
             if idx == 0:
-                y_out = unit_frequency_signal_shifted_y
+                x_out = shifted_unit_spectrum
             else:
-                y_out = list(
-                    np.array(y_out) + np.array(unit_frequency_signal_shifted_y)
-                )
-        return y_out, doppler_t
+                x_out = list(np.array(x_out) + np.array(shifted_unit_spectrum))
+        y_out = np.fft.irfft(x_out)
+        y_out = y_out / np.hamming(y_out.size)
+        return y_out, signal.t
 
     def get_doppler_signal_from_center_frequency(
         self, signal, direction_o, vo, v_sound
@@ -73,26 +64,6 @@ class DopplerSignal(BroadbandSignal):
             noise_x[int(component_frequency)] = 0j
         noise_y = np.fft.ifft(noise_x)
         return np.real(noise_y)
-
-    def get_unit_frequency_signal_y(self, signal, frequency):
-        filtered_x = np.zeros(signal.X.size)
-        filtered_x = filtered_x.astype(complex)
-
-        fourier_components_freqs = signal.fourier_components["freq"]
-        fourier_components_args = signal.fourier_components["arg"]
-        fourier_components_starts = signal.fourier_components["start"]
-        fourier_components_ends = signal.fourier_components["end"]
-
-        freq_index = fourier_components_freqs.index(frequency)
-        frequency_x_arg = fourier_components_args[freq_index]
-        frequency_start = fourier_components_starts[freq_index]
-        frequency_end = fourier_components_ends[freq_index]
-
-        for i in range(frequency_start, frequency_end):
-            filtered_x[i] = signal.X[i]
-        filtered_y = np.fft.irfft(filtered_x)
-        filtered_y = filtered_y / np.hamming(filtered_y.size)
-        return filtered_y
 
     def shift_signal(
         self,
@@ -161,3 +132,26 @@ class DopplerSignal(BroadbandSignal):
         # self.sampling_rate = np.where(t_out == min(t_out, key=lambda x: abs(x - 1)))[0]
         self.samples_number = doppler_time_vector.size
         return y_out, t_out
+
+    def shift_spectrum_unit(self, signal, frequency, doppler_shift):
+        shifted_x = np.zeros(signal.X.size)
+        shifted_x = shifted_x.astype(complex)
+        target_frequency = frequency + doppler_shift
+        fourier_components_freqs = signal.fourier_components["freq"]
+        fourier_components_starts = signal.fourier_components["start"]
+        fourier_components_ends = signal.fourier_components["end"]
+        fourier_components_args = signal.fourier_components["arg"]
+        target_frequency_arg = int(
+            target_frequency / signal.sampling_rate * signal.samples_number
+        )
+        freq_index = fourier_components_freqs.index(frequency)
+
+        frequency_x_arg = fourier_components_args[freq_index]
+        frequency_start = fourier_components_starts[freq_index]
+        frequency_end = fourier_components_ends[freq_index]
+        freq_arg_shift = target_frequency_arg - frequency_x_arg
+        for i in range(frequency_start, frequency_end):
+            target_arg = i + freq_arg_shift
+            if target_arg < shifted_x.size:
+                shifted_x[target_arg] = signal.X[i]
+        return shifted_x
