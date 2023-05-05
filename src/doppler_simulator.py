@@ -37,6 +37,7 @@ class DopplerSimulator:
             params["OBSERVER_DIRECTION"],
             params["ANGLE_BETWEEN_V_VECTOR_AND_WAVE_VECTOR"],
             params["MODE"],
+            params["DOMAIN"],
         )
 
     def create_signal(

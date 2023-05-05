@@ -9,3 +9,5 @@ class Constants:
     SIGNAL_SOURCE_GENERATED = "Generated"
     BROADEN_SIGNAL_PLOT_T_LENGTH = 1.5
     INTERP_SAMPLE_NUMBER_INCREASE = 10
+    TIME_DOMAIN = "Time domain"
+    FREQUENCY_DOMAIN = "Frequency domain"

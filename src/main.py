@@ -26,6 +26,7 @@ class MainWindow(DopplerSimulatorWindow):
             "TEMPERATURE": 20,
             "MODE": c.CENTER_FREQUENCY_MODE,
             "SIGNAL_SOURCE": c.SIGNAL_SOURCE_GENERATED,
+            "DOMAIN": c.FREQUENCY_DOMAIN,
         }
         self.setDefaults(self.params)
         self.setInputParams()
@@ -92,6 +93,7 @@ class MainWindow(DopplerSimulatorWindow):
         if self.params["SIGNAL_SOURCE"] == c.SIGNAL_SOURCE_GENERATED:
             self.params["SAMPLING_RATE"] = self.params["SAMPLING_RATE"] * 10
         self.params["CENTER_FREQUENCY"] == int(self.centerFrequencyInput.text())
+        self.params["DOMAIN"] = self.domain_combobox.currentText()
 
 
 if __name__ == "__main__":

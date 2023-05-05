@@ -37,6 +37,8 @@ class DopplerSimulatorWindow(QMainWindow):
         self.number_of_components_input = QLineEdit()
         self.observer_direction_combobox = QComboBox()
         self.signal_source_combobox = QComboBox()
+        self.domain_combobox = QComboBox()
+        self.domain_label = QLabel("Shift domain")
         self.f0_label = QLabel("F0")
         self.fmax_label = QLabel("Fmax")
         self.sampling_rate_label = QLabel("Sampling rate")
@@ -89,6 +91,8 @@ class DopplerSimulatorWindow(QMainWindow):
         self.control_layout.addWidget(self.modeCombobox, 9, 1)
         self.control_layout.addWidget(self.centerFrequencyLabel, 10, 0)
         self.control_layout.addWidget(self.centerFrequencyInput, 10, 1)
+        self.control_layout.addWidget(self.domain_label, 11, 0)
+        self.control_layout.addWidget(self.domain_combobox, 11, 1)
 
         self.chart_layout.addWidget(self.timeChart, 1, 0)
         self.chart_layout2.addWidget(self.spectrumChart, 1, 0)
@@ -117,6 +121,7 @@ class DopplerSimulatorWindow(QMainWindow):
         self.signal_duration_label.setAlignment(Qt.AlignRight)
         self.observer_direction_label.setAlignment(Qt.AlignRight)
         self.number_of_components_label.setAlignment(Qt.AlignRight)
+        self.domain_label.setAlignment(Qt.AlignRight)
         self.button.clicked.connect(self.the_button_was_toggled)
         self.slider.valueChanged.connect(self.slider_moved)
         self.slider.setMaximum(100)
@@ -126,6 +131,7 @@ class DopplerSimulatorWindow(QMainWindow):
         self.signal_source_combobox.addItems(["Generated", "From file"])
         self.ratioLabel.setAlignment(Qt.AlignCenter)
         self.modeCombobox.addItems(["From all frequencies", "From center frequency"])
+        self.domain_combobox.addItems(["Time domain", "Frequency domain"])
         self.modeLabel.setAlignment(Qt.AlignRight)
         self.centerFrequencyLabel.setAlignment(Qt.AlignRight)
 
@@ -161,6 +167,7 @@ class DopplerSimulatorWindow(QMainWindow):
         self.signal_source_combobox.setCurrentText(f"{params['SIGNAL_SOURCE']}")
         self.modeCombobox.setCurrentText(f"{params['MODE']}")
         self.centerFrequencyInput.setText(f"{params['CENTER_FREQUENCY']}")
+        self.domain_combobox.setCurrentText(f"{params['DOMAIN']}")
 
     def setAxesXlim(self, fmax):
         # self.spectrumChart.axes.set_xlim(xmin=0, xmax=fmax * 1.5)
