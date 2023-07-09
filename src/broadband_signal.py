@@ -43,22 +43,4 @@ class BroadbandSignal:
         else:
             T = N / sr
         freq = np.fft.rfftfreq(N, 1 / N) / T
-
         return freq, X, Xabs
-
-    def get_fourier_components_from_fourier(self, signal):
-        fs = signal.sampling_rate
-        Xabs_dB = 20 * np.log10(signal.Xabs)
-        treshhold = -45
-        ponad = (Xabs_dB >= treshhold).astype(np.int)
-        diff = np.diff(ponad)
-        starts = np.where(diff == 1)[0] + 1
-        ends = np.where(diff == -1)[0] + 1
-        fourier_components = dict({"freq": [], "arg": [], "start": [], "end": []})
-        for start, end in zip(starts, ends):
-            p = np.argmax(Xabs_dB[start:end]) + start
-            fourier_components["freq"].append(p * fs / signal.samples_number)
-            fourier_components["start"].append(start)
-            fourier_components["end"].append(end)
-            fourier_components["arg"].append(p)
-        return fourier_components

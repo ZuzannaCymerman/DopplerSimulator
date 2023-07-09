@@ -6,32 +6,39 @@ from frequency_domain import FrequencyDomain
 
 
 class DopplerSignal(BroadbandSignal):
-    def __init__(self, signal, vo, v_sound, direction_o, angle, shift_mode, domain):
+    def __init__(self, signal, vo, v_sound, direction_o, angle, domain):
         self.doppler_shifts = []
         self.sampling_rate = signal.sampling_rate
         self.samples_number = signal.samples_number
         self.ratio = 1
+        self.scale_factor = self.count_scale_factor(direction_o, vo, v_sound, angle)
+        self.center_freq_doppler_shift = self.count_doppler_shift(
+            direction_o, signal.center_frequency, vo, v_sound
+        )
+
         if domain == c.FREQUENCY_DOMAIN:
             self.domain = FrequencyDomain()
+            self.freq, self.X, self.Xabs = self.domain.shift_signal(signal, self)
+            self.y = np.fft.irfft(self.X)
+            self.time_scaling_ratio = self.y.size / signal.y.size
+            t = np.arange(
+                0,
+                signal.duration,
+                1 / self.y.size * signal.duration,
+            )
+            self.t = t[0 : self.y.size]
         else:
             self.domain = TimeDomain()
-
-        if shift_mode == c.ALL_FREQUENCIES_MODE:
-            (
-                self.y,
-                self.t,
-            ) = self.domain.get_doppler_signal_from_all_frequencies(
-                self, signal, direction_o, vo, v_sound
-            )
-        elif shift_mode == c.CENTER_FREQUENCY_MODE:
-            self.y, self.t = self.domain.get_doppler_signal_from_center_frequency(
-                self, signal, direction_o, vo, v_sound
-            )
+            self.y, self.t = self.domain.shift_signal(signal, self)
         filtered = self.y[0 : int(self.samples_number)]
         self.freq, self.X, self.Xabs = self.fourier(
-            filtered, self.sampling_rate, hamming=True
+            filtered, self.sampling_rate, hamming=False
         )
 
     def count_doppler_shift(self, direction_o, frequency, vo, v_sound):
         doppler_shift = direction_o * frequency * (vo / v_sound)
         return doppler_shift
+
+    def count_scale_factor(self, direction_o, vo, v_sound, angle):
+        scale_factor = 1 + (vo / v_sound) * direction_o
+        return scale_factor

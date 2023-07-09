@@ -14,17 +14,16 @@ class MainWindow(DopplerSimulatorWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.params = {
-            "F0": 10,
+            "F0": 100,
             "FMAX": 100,
-            "SAMPLING_RATE": 30,
-            "SIGNAL_DURATION": 1,
+            "SAMPLING_RATE": 200,
+            "SIGNAL_DURATION": 0.1,
             "NUMBER_OF_COMPONENTS": 1,
             "OBSERVER_VELOCITY": 50,
             "OBSERVER_DIRECTION": c.OBSERVER_COMMING_CLOSER,
             "CENTER_FREQUENCY": 50,
             "ANGLE_BETWEEN_V_VECTOR_AND_WAVE_VECTOR": 30,
             "TEMPERATURE": 20,
-            "MODE": c.CENTER_FREQUENCY_MODE,
             "SIGNAL_SOURCE": c.SIGNAL_SOURCE_GENERATED,
             "DOMAIN": c.FREQUENCY_DOMAIN,
         }
@@ -89,11 +88,13 @@ class MainWindow(DopplerSimulatorWindow):
 
         self.params["OBSERVER_VELOCITY"] = int(self.slider.value())
         self.params["SIGNAL_SOURCE"] = self.signal_source_combobox.currentText()
-        self.params["MODE"] = self.modeCombobox.currentText()
-        if self.params["SIGNAL_SOURCE"] == c.SIGNAL_SOURCE_GENERATED:
-            self.params["SAMPLING_RATE"] = self.params["SAMPLING_RATE"] * 10
-        self.params["CENTER_FREQUENCY"] == int(self.centerFrequencyInput.text())
+        self.params["CENTER_FREQUENCY"] = int(self.centerFrequencyInput.text())
         self.params["DOMAIN"] = self.domain_combobox.currentText()
+        if (
+            self.params["SIGNAL_SOURCE"] == c.SIGNAL_SOURCE_GENERATED
+            and self.params["DOMAIN"] == c.TIME_DOMAIN
+        ):
+            self.params["SAMPLING_RATE"] = self.params["SAMPLING_RATE"] * 10
 
 
 if __name__ == "__main__":

@@ -36,7 +36,6 @@ class DopplerSimulator:
             SOUND_VELOCITY,
             params["OBSERVER_DIRECTION"],
             params["ANGLE_BETWEEN_V_VECTOR_AND_WAVE_VECTOR"],
-            params["MODE"],
             params["DOMAIN"],
         )
 
@@ -50,7 +49,7 @@ class DopplerSimulator:
             signal.y = signal.generate_random_signal(
                 signal.t, f0, fmax, number_of_components
             )
+            signal.samples_number = signal.y.size
         signal.freq, signal.X, signal.Xabs = signal.fourier(
-            signal.y, signal.sampling_rate, hamming=True
+            signal.y, signal.sampling_rate, hamming=False
         )
-        signal.fourier_components = signal.get_fourier_components_from_fourier(signal)
