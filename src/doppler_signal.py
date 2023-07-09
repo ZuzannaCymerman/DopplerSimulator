@@ -10,7 +10,6 @@ class DopplerSignal(BroadbandSignal):
         self.doppler_shifts = []
         self.sampling_rate = signal.sampling_rate
         self.samples_number = signal.samples_number
-        self.ratio = 1
         self.scale_factor = self.count_scale_factor(direction_o, vo, v_sound, angle)
         self.center_freq_doppler_shift = self.count_doppler_shift(
             direction_o, signal.center_frequency, vo, v_sound
@@ -20,7 +19,6 @@ class DopplerSignal(BroadbandSignal):
             self.domain = FrequencyDomain()
             self.freq, self.X, self.Xabs = self.domain.shift_signal(signal, self)
             self.y = np.fft.irfft(self.X)
-            self.time_scaling_ratio = self.y.size / signal.y.size
             t = np.arange(
                 0,
                 signal.duration,
@@ -36,9 +34,10 @@ class DopplerSignal(BroadbandSignal):
         )
 
     def count_doppler_shift(self, direction_o, frequency, vo, v_sound):
-        doppler_shift = direction_o * frequency * (vo / v_sound)
+        # doppler_shift = direction_o * frequency * (vo / v_sound)
+        doppler_shift = frequency * self.scale_factor - frequency
         return doppler_shift
 
     def count_scale_factor(self, direction_o, vo, v_sound, angle):
-        scale_factor = 1 + (vo / v_sound) * direction_o
+        scale_factor = round((v_sound + direction_o * vo) / (v_sound), 5)
         return scale_factor

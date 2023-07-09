@@ -9,8 +9,8 @@ class DopplerSimulator:
     def __init__(self, params):
         DT = 1 / params["SAMPLING_RATE"]
         SAMPLES_NUMBER = params["SIGNAL_DURATION"] * params["SAMPLING_RATE"]
-        SOUND_VELOCITY = 331 + 0.6 * params["TEMPERATURE"]
-
+        # SOUND_VELOCITY = 331 + 0.6 * params["TEMPERATURE"]
+        SOUND_VELOCITY = 1500
         self.signal = BroadbandSignal(
             params["F0"],
             params["FMAX"],

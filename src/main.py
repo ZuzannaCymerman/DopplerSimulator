@@ -14,14 +14,14 @@ class MainWindow(DopplerSimulatorWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.params = {
-            "F0": 100,
-            "FMAX": 100,
-            "SAMPLING_RATE": 200,
-            "SIGNAL_DURATION": 0.1,
+            "F0": int(10 * c.kHz),
+            "FMAX": int(100 * c.kHz),
+            "SAMPLING_RATE": int(96 * c.kHz),
+            "SIGNAL_DURATION": 0.01,
             "NUMBER_OF_COMPONENTS": 1,
-            "OBSERVER_VELOCITY": 50,
+            "OBSERVER_VELOCITY": 15,
             "OBSERVER_DIRECTION": c.OBSERVER_COMMING_CLOSER,
-            "CENTER_FREQUENCY": 50,
+            "CENTER_FREQUENCY": int(30 * c.kHz),
             "ANGLE_BETWEEN_V_VECTOR_AND_WAVE_VECTOR": 30,
             "TEMPERATURE": 20,
             "SIGNAL_SOURCE": c.SIGNAL_SOURCE_GENERATED,
@@ -40,10 +40,13 @@ class MainWindow(DopplerSimulatorWindow):
             self.params["FMAX"],
             self.params["OBSERVER_DIRECTION"],
         )
-        self.ratioLabel.setText(f"Ratio: {doppler_simulator.dopplerSignal.ratio}")
+        self.ratioLabel.setText(
+            f"Ratio: {round(doppler_simulator.dopplerSignal.scale_factor,3)}\
+            \nCenter frequency shift: {round(doppler_simulator.dopplerSignal.center_freq_doppler_shift,3)}"
+        )
 
-    def adjustBroadenSignalPlot(self, signal):
-        t = np.arange(0, signal.duration * c.BROADEN_SIGNAL_PLOT_T_LENGTH, signal.dt)
+    def adjustBroadenSignalPlot(self, signal, dopplerSignal):
+        t = dopplerSignal.t
         y = [0] * t.size
         y[0 : signal.y.size] = signal.y
         return t, y
@@ -52,8 +55,11 @@ class MainWindow(DopplerSimulatorWindow):
         self.clearAxes()
         self.adjustAxesGrid()
 
-        if self.params["OBSERVER_DIRECTION"] == c.OBSERVER_COMMING_FURTHER:
-            t, y = self.adjustBroadenSignalPlot(signal)
+        if (
+            self.params["OBSERVER_DIRECTION"] == c.OBSERVER_COMMING_FURTHER
+            and self.params["DOMAIN"] == c.TIME_DOMAIN
+        ):
+            t, y = self.adjustBroadenSignalPlot(signal, dopplerSignal)
         else:
             t, y = signal.t, signal.y
 

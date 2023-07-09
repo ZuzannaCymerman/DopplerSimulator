@@ -7,9 +7,7 @@ class FrequencyDomain:
         pass
 
     def shift_signal(self, signal, doppler_signal):
-        shifted_x = np.zeros(
-            signal.X.size + int(doppler_signal.center_freq_doppler_shift)
-        )
+        shifted_x = np.zeros(signal.X.size)
         shifted_x = shifted_x.astype(complex)
         for i, x in enumerate(signal.X):
             shifted_f = (
@@ -20,10 +18,9 @@ class FrequencyDomain:
             print(
                 f"i: {i}, shifted_i: {shifted_i}, f: {i * signal.sampling_rate / signal.samples_number}, shifted_f = {shifted_f}"
             )
-            shifted_x[shifted_i] = x
+            if shifted_i < signal.X.size and shifted_i >= 0:
+                shifted_x[shifted_i] = x
         print("")
-
-        # To trzeba przesuwac jakos na podstawie freqa
         N = len(shifted_x)
         T = N / signal.sampling_rate
         freq = np.fft.fftfreq(N, 1 / N) / T

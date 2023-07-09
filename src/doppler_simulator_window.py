@@ -25,7 +25,7 @@ class DopplerSimulatorWindow(QMainWindow):
 
     def slider_moved(self):
         self.velocityLabel.setText(f"Velocity: {int(self.slider.value())}")
-        self.slider.setValue(int(self.slider.value() / 10) * 10)
+        self.slider.setValue(int(self.slider.value()))
 
     def addQtComponents(self):
         self.label = QLabel("Doppler simulator")
@@ -60,7 +60,7 @@ class DopplerSimulatorWindow(QMainWindow):
         self.chart_container = QWidget()
         self.chart_container2 = QWidget()
         self.control_container = QWidget()
-        self.ratioLabel = QLabel("Ratio: 0")
+        self.ratioLabel = QLabel("Ratio: \nCenter frequency shift:")
         self.centerFrequencyLabel = QLabel("Center frequency")
         self.centerFrequencyInput = QLineEdit()
 
@@ -120,7 +120,7 @@ class DopplerSimulatorWindow(QMainWindow):
         self.domain_label.setAlignment(Qt.AlignRight)
         self.button.clicked.connect(self.the_button_was_toggled)
         self.slider.valueChanged.connect(self.slider_moved)
-        self.slider.setMaximum(100)
+        self.slider.setMaximum(30)
         self.observer_direction_combobox.addItems(
             ["Observer comming closer", "Observer comming further"]
         )
